@@ -1,3 +1,4 @@
+import itertools
 import hashlib as hasher
 import datetime as date
 import string
@@ -22,27 +23,24 @@ class Block:
     
     
 def create_genesis_block():
-    
-    return Block(0, date.datetime.now(), "This is first block data", str(0))
+    return Block(0, date.datetime.now(), "Genesis Block", str(0))
 
 
-def next_block(last_block):
+def next_block(last_block, data):
     current_index = last_block.index + 1
-    
     current_timestamp = date.datetime.now()
-    
-    current_data = str(current_index) + string.ascii_lowercase
-
     current_hash = last_block.hash
-    
-    return Block(current_index, current_timestamp, current_data, current_hash)
+    return Block(current_index, current_timestamp, data, current_hash)
 
 
-blockchain = [create_genesis_block()]
+def create_blockchain():
+    blockchain = [create_genesis_block()]
+    for index in itertools.count():
+        data = yield
+        block = next_block(blockchain[index], data)
+        yield block
+        blockchain.append(block)
 
-number_of_blocks = 10
-
-for i in range(10):
-    new_block = next_block(blockchain[i])
-    blockchain.append(new_block)
-    print(f"Data: {new_block.data}, New block is : {new_block.hash} \n")
+blockchain = create_blockchain()
+next(blockchain)
+print(blockchain.send('LSD was ordered').data)
